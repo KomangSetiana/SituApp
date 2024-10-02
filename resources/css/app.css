@@ -1,0 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.link-sidebar.active {
+    @apply bg-sky-900 text-yellow-400;
+}

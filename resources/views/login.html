@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Login Page</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            .border-login {
+                width: 334px;
+                height: 384px;
+            }
+        </style>
+    </head>
+    <body class="bg-sky-950 flex flex-col min-h-screen">
+        <!-- Logo -->
+        <header class="w-full bg-sky-950 p-4">
+            <div class="container mx-auto flex items-center">
+                <div>
+                    <img src="../../public/logo.png" alt="Logo" class="h-16" />
+                </div>
+                <div class="px-2">
+                    <h1 class="font-extrabold text-white text-3xl">SITU</h1>
+                </div>
+            </div>
+        </header>
+
+        <main
+            class="flex flex-1 justify-center items-center px-4 py-8 md:py-24"
+        >
+            <div
+                class="flex flex-col md:flex-row justify-center items-center w-full max-w-screen-lg"
+            >
+                <!-- Login Form -->
+                <div class="w-full md:w-3/12 mb-8 md:mb-0 md:-mt-28 md:mr-16">
+                    <h1 class="text-3xl text-white mb-6">
+                        <span class="font-bold text-yellow-600">Login</span>
+                        Dengan<br />
+                        Akun <span class="font-bold text-yellow-600">Anda</span>
+                    </h1>
+                    <form @submit.prevent="handleLogin">
+                        <div class="flex flex-col mb-4">
+                            <label for="email" class="text-lg mb-2 text-white"
+                                >Email Address</label
+                            >
+                            <input
+                                name="email"
+                                type="email"
+                                v-model="email"
+                                class="bg-white focus:outline-none border px-6 py-3 w-full border-sky-600 focus:border-blue-500"
+                                placeholder="Your email address"
+                                required
+                            />
+                        </div>
+                        <div class="flex flex-col mb-4">
+                            <label
+                                for="password"
+                                class="text-lg mb-2 text-white"
+                                >Password</label
+                            >
+                            <input
+                                name="password"
+                                type="password"
+                                v-model="password"
+                                class="bg-white focus:outline-none border px-6 py-3 w-full border-sky-600 focus:border-blue-500"
+                                placeholder="Your password"
+                                required
+                            />
+                        </div>
+                        <button
+                            type="submit"
+                            class="bg-yellow-600 font-semibold hover:bg-yellow-400 transition-all duration-200 focus:outline-none shadow-inner text-white px-6 py-3 w-full mt-4"
+                        >
+                            Masuk
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Hero Image -->
+                <div
+                    class="w-full md:w-5/12 hidden md:flex justify-end md:ml-16"
+                >
+                    <div class="relative" style="width: 369px; height: 440px">
+                        <div
+                            class="border-login absolute border-yellow-600 border-2 -mt-8 -ml-16 left-0"
+                        ></div>
+                        <div class="absolute w-full h-full -mb-6 -ml-3">
+                            <img
+                                src="../../public/hero-img.jpg"
+                                alt="Login"
+                                class="object-cover w-full h-full"
+                            />
+                        </div>
+                        <div
+                            class="absolute z-10 bg-white border border-gray-300 bottom-0 right-0 py-3 px-4 -mr-12"
+                            style="width: 290px"
+                        >
+                            <p class="text-sky-950 mb-2">
+                                Dapatkan Nomor Naskah Untuk Naskah Anda
+                            </p>
+                            <span class="text-sky-900 text-sm">Ayo login!</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </body>
+</html>
