@@ -10,7 +10,7 @@ class WewenangController extends Controller
 {
     public function index(Request $request)
     {
-        $Wewenang = Wewenang::fillter($request)->with(['jabatan', 'jenisNaskah'])->orderBy('id', 'DESC')->get();
+        $Wewenang = Wewenang::fillter($request)->with(['jabatan', 'jenisNaskah'])->orderBy('id', 'DESC')->paginate(50);
 
         return $this->sendResponse($Wewenang, 'success');
     }

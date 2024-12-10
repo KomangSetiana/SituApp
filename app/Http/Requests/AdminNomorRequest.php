@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 
-class NomorRequest extends FormRequest
+class AdminNomorRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -36,6 +36,7 @@ class NomorRequest extends FormRequest
             "tujuan" => "required",
             "plh_id" => "nullable",
             "akses_naskah" => "nullable",
+            "id_pengguna" => "required",
             "proses_by" => "required"
         ];
     }
@@ -51,6 +52,8 @@ class NomorRequest extends FormRequest
             'tanggal_surat.before_or_equal' => 'Tanggal yang dimasukan harus tanggal hari ini atau tanggal sebelum hari ini.',
             'tanggal_surat.after_or_equal' => 'Tidak boleh memasukan tanggal pada tahun yang sudah lewat.',
             "proses_by.required" => "proses by wajib diisi",
+            "id_pengguna.required" => "penerima nomor wajib diisi",
+
 
 
         ];

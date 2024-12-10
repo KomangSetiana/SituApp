@@ -63,10 +63,9 @@
     </section>
 </template>
 <script setup>
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import Swal from 'sweetalert2'
 import router from '../router';
-import Spiner from './Parts/Spiner.vue'
 
 
 const spin = ref(null)
@@ -105,12 +104,18 @@ const handleLogin = async () => {
         localStorage.setItem('user', JSON.stringify(res.data.user));
         spin.value = false
         if (res.data.user.role === 'admin') {
-            router.push('/naskah');
+            router.push('/admin/dashboard');
+
+        } else if (res.data.user.role === 'user') {
+            router.push('/my/dashboard');
+            // window.location.href = '/my/nomor'
+
         } else {
-            router.push('/my/nomor');
+            window.location.href = "/"
         }
     }).catch((err) => {
         spin.value = false
+        console.log(err)
         if (err.response.data.error == 'Invalid credentials' && err.response.status == 401) {
             Swal.fire({
                 icon: "error",
@@ -118,11 +123,51 @@ const handleLogin = async () => {
                 text: "Invalid Username/Password.",
             });
         }
+        if (err.response.status == 500) {
+            Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: "Internal server login error",
+            });
+        }
     })
 
 
 
 }
+
+const verifyToken = async () => {
+    const token = localStorage.getItem('token');
+
+    if (token) {
+
+        try {
+            // Kirim request ke server untuk memeriksa apakah token valid
+            const response = await axios.post('/api/verify-token', { token });
+            // Kirim request ke server untuk memeriksa apakah token valid
+            if (response.data.user.role === "admin") {
+                // Jika valid, redirect ke halaman naskah untuk admin
+                router.push("/admin/dashboard"); // Redirect untuk admin
+            } else if (response.data.user.role === "user") {
+                // Jika role adalah user, redirect ke dashboard
+                router.push("/my/dashboard"); // Redirect untuk user
+            } else {
+                // Jika role tidak dikenali, redirect ke halaman utama
+                router.push("/");
+                return
+            }
+
+        } catch (error) {
+            console.error('Token tidak valid atau telah expired', error);
+            router.push('/');
+            return
+        }
+    }
+}
+
+verifyToken()
+
+
 
 </script>
 <style scoped>

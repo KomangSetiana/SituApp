@@ -12,7 +12,7 @@ class Plh extends Model
 
     protected $fillable = ["jabatan_id", "tanggal"];
 
-    public function jabatans()
+    public function jabatan()
     {
         return $this->belongsTo(Jabatan::class, 'jabatan_id');
     }

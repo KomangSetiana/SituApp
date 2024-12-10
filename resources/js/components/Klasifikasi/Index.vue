@@ -6,18 +6,8 @@
 
         <!-- Main content -->
         <div class="flex-1 flex flex-col  h-screen overflow-y-auto">
-            <header class="flex justify-between items-center bg-sky-900 shadow-md p-4">
-                <div class="text-2xl text-yellow-400 font-bold">Klasifikasi</div>
+            <Header :title="'Klasifikasi'" @toggleSidebar="toggleSidebar" />
 
-
-                <button @click="toggleSidebar" class="md:hidden text-yellow-400 focus:outline-none">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
-                </button>
-            </header>
             <main class="flex-1 p-6">
                 <div class="w-full">
                     <div class="flex justify-between w-full">
@@ -81,25 +71,10 @@
                 </div>
                 <Sekeleton :is_loading="is_loading" />
 
-                <!-- Pagination -->
-                <div class="pagination" v-show="klasifikasis.length > 1">
-                    <button :disabled="!pagination.prev_page_url"
-                        @click="loadKlasifikasi(page = pagination.current_page - 1)">
-                        Previous
-                    </button>
-
-                    <button v-for="page in paginationLinks" :key="page"
-                        :class="{ 'active-page': page === pagination.current_page }" @click="handleFillter(page)">
-                        {{ page }}
-                    </button>
-
-                    <button :disabled="!pagination.next_page_url"
-                        @click="loadKlasifikasi(page = pagination.current_page + 1)">
-                        Next
-                    </button>
-                </div>
-
             </main>
+
+            <Pagination :pagination="pagination" :totalItems="klasifikasis.length" :pageLimit="4"
+                @pageChange="loadKlasifikasi" />
         </div>
     </div>
 
@@ -164,14 +139,14 @@ import Sekeleton from '../Parts/Sekeleton.vue';
 import getKlasifikasi from '../composables/getKlasifikasi';
 import router from "../../router";
 import NotFound from '../Parts/404.vue'
-
+import Header from "../Parts/Header.vue"
+import Pagination from "../Parts/Pagination.vue"
 const isSidebarOpen = ref(false)
 const statusModal = ref(false)
 const modalActive = ref(false)
 const modalUpdate = ref(null)
 const modalCreate = ref(null)
 
-const userName = ref(null)
 
 const errors = ref({})
 const form = ref({
@@ -189,6 +164,7 @@ function toggleSidebar() {
 
 const handleFillter = (page) => {
     klasifikasis.value = []
+    not_found.value = false
     setTimeout(() => {
 
         loadKlasifikasi(page)
@@ -197,10 +173,7 @@ const handleFillter = (page) => {
 
 const { not_found, pagination, is_loading, fillter, klasifikasis, loadKlasifikasi } = getKlasifikasi()
 loadKlasifikasi()
-const paginationLinks = computed(() => {
-    const totalPages = pagination.value.last_page;
-    return Array.from({ length: totalPages }, (_, i) => i + 1);
-});
+
 
 
 const createKlasifikasi = async () => {
@@ -303,13 +276,13 @@ const updateKlasifikasi = async () => {
 const deleteKlasifikasi = (id) => {
 
     Swal.fire({
-        title: "Are you sure?",
-        text: "You won't be able to revert this!",
+        title: "Apakah anda yakin?",
+        text: "Anda tidak akan bisa mengembalikan data ini!",
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, delete it!"
+        confirmButtonText: "Iya,Hapus!"
     }).then((result) => {
         if (result.isConfirmed) {
 
@@ -320,8 +293,8 @@ const deleteKlasifikasi = (id) => {
             }).then(() => {
                 loadKlasifikasi()
                 Swal.fire({
-                    title: "Deleted!",
-                    text: "Your file has been deleted.",
+                    title: "Terhapus!",
+                    text: "Data anda telah dihapus.",
                     icon: "success"
                 });
             }).catch((err) => {
@@ -364,6 +337,9 @@ const toggleModalUpdate = (p) => {
 
 }
 
+
+
+
 </script>
 
 
@@ -387,32 +363,6 @@ const toggleModalUpdate = (p) => {
 
 }
 
-
-.pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: 20px;
-}
-
-.pagination button {
-    padding: 8px 16px;
-    background-color: #1d4ed8;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.pagination button:disabled {
-    background-color: #9ca3af;
-    cursor: not-allowed;
-}
-
-.pagination button.active-page {
-    background-color: #fbbf24;
-}
 
 :disabled {
     @apply bg-gray-400

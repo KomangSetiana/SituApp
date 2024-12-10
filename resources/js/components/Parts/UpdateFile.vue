@@ -3,7 +3,7 @@
         <!-- File Input -->
         <label
             class="block w-full p-2 text-center bg-gray-100 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-200">
-            <span class="text-sm font-medium text-gray-700">Click to upload a file</span>
+            <span class="text-sm font-medium text-gray-700">Upload file</span>
             <input type="file" class="hidden" @change="handleFileUpload" />
         </label>
 
@@ -18,7 +18,8 @@
         <!-- Upload Button -->
         <button @click="submitFile" :disabled="!file"
             class="mt-2 px-4 py-1 text-white bg-sky-600 rounded-lg hover:bg-sky-700 focus:outline-none focus:ring focus:ring-sky-300 disabled:opacity-50">
-            Upload File
+            Upload
+            <fa :icon="['fas', 'spinner']" v-show="spin" class="animate-spin" />
         </button>
     </div>
 </template>
@@ -39,6 +40,7 @@ const props = defineProps({
 // Reactive variables
 const file = ref(null);
 const errors = ref(null);
+const spin = ref(null)
 
 // Handle file input
 const handleFileUpload = (event) => {
@@ -47,6 +49,9 @@ const handleFileUpload = (event) => {
 
 // Submit the file
 const submitFile = async () => {
+    setTimeout(() => {
+        spin.value = true
+    }, 1000);
     if (!file.value) return;
 
     const formData = new FormData();
@@ -57,14 +62,15 @@ const submitFile = async () => {
             headers: {
                 'Content-Type': 'multipart/form-data',
 
-                Authorization: "Bearer" + localStorage.getItem("token"),
+                Authorization: "Bearer " + localStorage.getItem("token"),
 
             },
         });
         // console.log(response.data.message);
 
-        router.push('/my/nomor/selesai')
+        window.location.href = '/my/nomor/selesai'
     } catch (error) {
+        spin.value = false
         if (error.response) {
             if (error.response.status === 413) {
                 // Jika error 413

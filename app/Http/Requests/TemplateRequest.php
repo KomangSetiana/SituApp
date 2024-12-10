@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UploadFileRequest extends FormRequest
+class TemplateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,16 +22,17 @@ class UploadFileRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'file' => 'required|mimes:pdf|max:2048',
+            'nama' => 'required',
+            'filename' => 'required|mimes:pdf,doc,docx|max:2048'
+
         ];
     }
 
     public function messages()
     {
         return [
-            'file.required' => 'file wajib diisi.',
-            "file.mimes" => "file hanya boleh pdf",
-            'file.max:2048' => 'ukuran file terlalu besar maksimal 2mb.',
+            'nama.required' => 'Jabatan wajib diisi.',
+            "filename.required" => "file wajib diisi"
 
         ];
     }

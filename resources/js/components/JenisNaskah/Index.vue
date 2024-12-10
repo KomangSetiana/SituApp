@@ -6,16 +6,8 @@
 
         <!-- Main content -->
         <div class="flex-1 flex flex-col  h-screen overflow-y-auto">
-            <header class="flex justify-between items-center bg-sky-900 shadow-md p-4">
-                <div class="text-2xl text-yellow-400 font-bold">Jenis Naskah</div>
-                <button @click="toggleSidebar" class="md:hidden text-yellow-400 focus:outline-none">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
-                </button>
-            </header>
+            <Header :title="'Jenis Naskah'" @toggleSidebar="toggleSidebar" />
+
             <main class="flex-1 p-6">
                 <div class="w-full">
                     <div class="flex justify-between w-full">
@@ -129,6 +121,22 @@
                         <span v-if="errors.kode" class="text-red-500">{{ errors.kode[0] }}</span>
 
                     </div>
+                    <div>
+                        <input type="checkbox" id="checkbox" v-model="form.akses_naskah"
+                            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2" />
+                        <label for="checkbox" class="ml-2 text-gray-900">Jenis naskah ini punya akses naskah R/B/T? ({{
+                            form.akses_naskah ==
+                                null ? 'Tidak' : form.akses_naskah == false ? 'Tidak' : 'Iya'
+                        }})</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="checkbox" v-model="form.has_direktur"
+                            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2" />
+                        <label for="checkbox" class="ml-2 text-gray-900">Jenis Naskah ini hanya bisa ditanda tangani
+                            oleh direktur? ({{ form.has_direktur ==
+                                null ? 'Tidak' : form.has_direktur == false ? 'Tidak' : 'Iya'
+                            }})</label>
+                    </div>
 
                 </div>
 
@@ -163,6 +171,7 @@ import NotFound from '../Parts/404.vue'
 import 'vue-multiselect/dist/vue-multiselect.css'
 import Multiselect from 'vue-multiselect'
 import router from "../../router";
+import Header from "../Parts/Header.vue"
 
 const isSidebarOpen = ref(false)
 const statusModal = ref(false)
@@ -175,7 +184,9 @@ const errors = ref({})
 const form = ref({
     naskah_id: '',
     nama: '',
-    kode: ''
+    kode: '',
+    akses_naskah: '',
+    has_direktur: ''
 
 });
 
@@ -185,6 +196,7 @@ function toggleSidebar() {
 }
 
 const handleFillter = () => {
+    not_found.value = false
     jenisNaskahs.value = []
     setTimeout(() => {
 
@@ -200,6 +212,8 @@ const createJenisNaskah = async () => {
     await axios.post("/api/jenis-naskah", {
         nama: form.value.nama,
         kode: form.value.kode,
+        akses_naskah: form.value.akses_naskah,
+        has_direktur: form.value.has_direktur,
         naskah_id: form.value.naskah_id,
     }, {
         headers: {
@@ -249,6 +263,8 @@ const updateJenisNaskah = async () => {
     await axios.put("/api/jenis-naskah/" + form.value.id, {
         nama: form.value.nama,
         kode: form.value.kode,
+        akses_naskah: form.value.akses_naskah,
+        has_direktur: form.value.has_direktur,
         naskah_id: form.value.naskah_id,
     }, {
         headers: {
@@ -297,13 +313,13 @@ const updateJenisNaskah = async () => {
 const deleteJenisNaskah = (id) => {
 
     Swal.fire({
-        title: "Are you sure?",
-        text: "You won't be able to revert this!",
+        title: "Apakah anda yakin?",
+        text: "Anda tidak akan bisa mengembalikan data ini!",
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, delete it!"
+        confirmButtonText: "Iya,Hapus!"
     }).then((result) => {
         if (result.isConfirmed) {
 
@@ -314,8 +330,8 @@ const deleteJenisNaskah = (id) => {
             }).then(() => {
                 loadJenisNaskah()
                 Swal.fire({
-                    title: "Deleted!",
-                    text: "Your file has been deleted.",
+                    title: "Terhapus!",
+                    text: "Data anda telah dihapus.",
                     icon: "success"
                 });
             }).catch((err) => {
@@ -360,6 +376,9 @@ const toggleModalUpdate = (item) => {
     form.value = item
     form.value.naskah_id = item.naskah
     errors.value = {}
+    form.value.akses_naskah = item.akses_naskah == 1 ? form.value.akses_naskah = true : form.value.akses_naskah = false
+    form.value.has_direktur = item.has_direktur == 1 ? form.value.has_direktur = true : form.value.has_direktur = false
+
 }
 </script>
 

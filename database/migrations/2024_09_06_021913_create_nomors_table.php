@@ -16,7 +16,9 @@ return new class extends Migration
             $table->foreignId('jabatan_id')->constrained('jabatans')->onDelete('cascade');
             $table->foreignId('jenis_naskah_id')->constrained('jenis_naskahs')->onDelete('cascade');
             $table->foreignId('klasifikasi_id')->constrained('klasifikasis')->onDelete('cascade');
-            $table->foreignId('id_pengguna')->constrained('users')->onDelete('cascade');
+            $table->string('id_pengguna');  // This will be the foreign key column
+            // Create a foreign key reference on the `id_pengguna` column instead of the `id`
+            $table->foreign('id_pengguna')->references('id_pengguna')->on('users')->onDelete('cascade');
             $table->date('tanggal_surat');
             $table->string('nomor_surat');
             $table->string('tujuan');
@@ -26,6 +28,7 @@ return new class extends Migration
             $table->string('filename')->nullable();
             $table->boolean('tipe')->default(0);
             $table->foreignId('akses_naskah')->nullable()->constrained('akses_naskahs')->onDelete('cascade');
+            $table->string('proses_by');
             $table->softDeletes();
             $table->timestamps();
         });

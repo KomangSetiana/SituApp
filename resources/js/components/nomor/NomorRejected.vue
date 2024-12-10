@@ -6,7 +6,7 @@
 
         <!-- Main content -->
         <div class="flex-1 flex flex-col  h-screen overflow-y-auto">
-            <Header :title="'Naskah Selesai'" @toggleSidebar="toggleSidebar" />
+            <Header :title="'Naskah Ditolak'" @toggleSidebar="toggleSidebar" />
 
             <main class="flex-1 p-6">
                 <div class="w-full">
@@ -66,7 +66,7 @@
 
                     </div>
                     <TableComponent
-                        :headers="['#', 'Penanda Tangan', 'Pembuat Nomor', 'Nomor Naskah', 'Jenis Naskah', 'Klasifikasi', 'Tanggal', 'Status', 'tujuan', 'perihal', 'File Naskah', 'Proses By', 'Action']"
+                        :headers="['#', 'Penanda Tangan', 'Pembuat Nomor', 'Nomor Naskah', 'Jenis Naskah', 'Klasifikasi', 'Tanggal', 'Status', 'tujuan', 'perihal', 'File Naskah', 'Action']"
                         @edit="toggleModalUpdate()">
                         <tr v-for="(item, index) in datas" :key="index" class="hover:bg-slate-200 text-sm"
                             :class="[index % 2 == 0 ? 'bg-gray-50' : 'bg-white']">
@@ -119,9 +119,6 @@
                                     </a>
                                     <p v-if="!item.filename">belum upload file</p>
                                 </div>
-                            </td>
-                            <td class="py-1 px-1 text-gray-700">
-                                {{ item.proses_by }}
                             </td>
                             <td class="py-1 px-1 text-gray-700 text-center">
                                 <button
@@ -260,7 +257,7 @@ const form = ref({
 const loadNomor = async (page = 1) => {
     is_loading.value = true
     not_found.value = false
-    await axios.get(`/api/nomor-selesai?page=${page}`, {
+    await axios.get(`/api/nomor-rejected?page=${page}`, {
         headers: {
             Authorization: "Bearer" + localStorage.getItem("token"),
         }, params: fillter

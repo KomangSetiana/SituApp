@@ -15,7 +15,7 @@ class Nomor extends Model
     protected $fillable = [
 
         'jabatan_id', 'jenis_naskah_id', 'klasifikasi_id', 'tujuan', 'perihal', 'tanggal_surat', 'nomor_surat',
-        'filename', 'status', 'tipe', 'plh_id', 'akses_naskah', 'id_pengguna'
+        'filename', 'status', 'tipe', 'plh_id', 'akses_naskah', 'id_pengguna', 'proses_by'
     ];
 
 
@@ -27,7 +27,7 @@ class Nomor extends Model
 
     public function klasifikasis()
     {
-        return $this->belongsTo(Klasifikasi::class);
+        return $this->belongsTo(Klasifikasi::class, 'klasifikasi_id');
     }
 
     public function jabatan()
@@ -41,7 +41,7 @@ class Nomor extends Model
 
     public function users()
     {
-        return $this->belongsTo(User::class, 'id_pengguna');
+        return $this->belongsTo(User::class, 'id_pengguna', 'id_pengguna');
     }
 
     public function akses_naskahs()
@@ -49,12 +49,19 @@ class Nomor extends Model
         return $this->belongsTo(AksesNaskah::class, 'akses_naskah');
     }
 
+    public function plhs()
+    {
+        return $this->belongsTo(Plh::class, 'plh_id');
+    }
+
 
 
     public function scopeFillter($query, $request)
     {
         $query->when($request->search, function ($query) use ($request) {
-
+            $query->where('nomor_surat', 'like', '%' . $request->search . '%');
+            $query->where('tujuan', 'like', '%' . $request->search . '%');
+            $query->where('perihal', 'like', '%' . $request->search . '%');
             $query->WhereHas('jabatan', function ($query) use ($request) {
                 $query->where('nama', 'like', '%' . $request->search . '%');
             });
@@ -63,6 +70,9 @@ class Nomor extends Model
             });
             $query->orWhereHas('users', function ($query) use ($request) {
                 $query->where('nama_pengguna', 'like', '%' . $request->search . '%');
+            });
+            $query->orWhereHas('klasifikasis', function ($query) use ($request) {
+                $query->where('nama', 'like', '%' . $request->search . '%');
             });
         });
     }

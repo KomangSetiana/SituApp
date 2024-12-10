@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class PlhRequest extends FormRequest
 {
@@ -25,7 +26,8 @@ class PlhRequest extends FormRequest
         $akhirTahun = Carbon::now('Asia/Makassar')->endOfYear();
         return [
             'jabatan_id' => 'required',
-            'tanggal' => 'required|date|after_or_equal:today|before_or_equal:' . $akhirTahun,
+            'tanggal' => ['required', 'date', 'after_or_equal:today|before_or_equal:' . $akhirTahun,  Rule::unique('plhs', 'tanggal')]
+
         ];
     }
 
@@ -34,6 +36,7 @@ class PlhRequest extends FormRequest
         return [
             "jabatan_id.required" => "Jabatan wajib diisi",
             'tanggal.required' => 'Tanggal wajib diisi.',
+            'tanggal.unique' => 'Plh di tanggal ini sudah ada.',
             'tanggal.before_or_equal' => 'Tidak boleh memasukan tanggal tahun depan.',
             'tanggal.after_or_equal' => 'Tidak boleh memasukan tanggal yang sudah lewat',
 

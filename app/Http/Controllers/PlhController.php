@@ -10,7 +10,7 @@ class PlhController extends Controller
 {
     public function index(Request $request)
     {
-        $plh = Plh::fillter($request)->with('jabatans')->orderBy('id', 'DESC')->get();
+        $plh = Plh::fillter($request)->with('jabatans')->orderBy('id', 'DESC')->paginate(50);
 
         return $this->sendResponse($plh, 'success');
     }

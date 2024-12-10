@@ -25,11 +25,11 @@ class CheckTime
         }
 
         // Cek jika waktu di luar 09:00 - 16:00
-        $startWorkTime = Carbon::createFromTime(9, 0, 0, 'Asia/Makassar');
-        $endWorkTime = Carbon::createFromTime(17, 0, 0, 'Asia/Makassar');
+        $startWorkTime = Carbon::createFromTime(8, 0, 0, 'Asia/Makassar');
+        $endWorkTime = Carbon::createFromTime(18, 0, 0, 'Asia/Makassar');
 
         if ($currentTime->lt($startWorkTime) || $currentTime->gt($endWorkTime)) {
-            return response()->json(['message' => 'Data hanya bisa dibuat antara jam 09:00 dan 17:00.'], 403);
+            return response()->json(['message' => 'Data hanya bisa dibuat antara jam 08:00 dan 18:00.'], 403);
         }
 
         return $next($request);

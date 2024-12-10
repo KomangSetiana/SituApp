@@ -6,20 +6,35 @@
 
         <!-- Main content -->
         <div class="flex-1 flex flex-col  h-screen overflow-y-auto">
-            <header class="flex justify-between items-center bg-sky-900 shadow-md p-4">
-                <div class="text-2xl text-yellow-400 font-bold">Nomor Naskah Selesai</div>
-                <button @click="toggleSidebar" class="md:hidden text-yellow-400 focus:outline-none">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
-                </button>
-            </header>
+            <Header :title="'Nomor Selesai'" @toggleSidebar="toggleSidebar" />
+
             <main class="flex-1 p-6">
                 <div class="w-full">
                     <div class="flex flex-wrap md:justify-between w-full">
                         <div class="flex items-end">
+                            <form @submit.prevent=" handleFillter()" class="flex items-center max-w-sm mr-4 ">
+                                <label for="simple-search" class="sr-only">Search</label>
+                                <div class="relative w-full">
+                                    <div
+                                        class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none text-gray-500">
+                                        <fa :icon="['fas', 'magnifying-glass']" />
+                                    </div>
+                                    <input type="text" v-model="fillter.search" id="simple-search"
+                                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full ps-10 p-2.5 focus:outline-none  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-sky-500 dark:focus:border-sky-500"
+                                        placeholder="Search name..." required />
+                                </div>
+                                <button type="submit"
+                                    class="py-2 px-3 ms-2 text-sm font-medium text-white bg-sky-800 rounded-lg  hover:bg-sky-600 focus:ring-4 focus:outline-none focus:ring-sky-300 dark:bg-sky-600 dark:hover:bg-sky-700 dark:focus:ring-sky-800">
+                                    <fa :icon="['fas', 'magnifying-glass']" />
+
+                                    <span class="sr-only">Search</span>
+                                </button>
+                            </form>
+
+                        </div>
+
+                        <div class="flex items-end">
+
                             <form @submit.prevent=" handleFillter()"
                                 class="flex items-center max-w-sm mr-4 md:mb-0 mb-2">
                                 <!-- Start Date -->
@@ -55,27 +70,7 @@
                             </form>
                         </div>
 
-                        <div class="flex items-end">
-                            <form @submit.prevent=" handleFillter()" class="flex items-center max-w-sm mr-4 ">
-                                <label for="simple-search" class="sr-only">Search</label>
-                                <div class="relative w-full">
-                                    <div
-                                        class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none text-gray-500">
-                                        <fa :icon="['fas', 'magnifying-glass']" />
-                                    </div>
-                                    <input type="text" v-model="fillter.search" id="simple-search"
-                                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full ps-10 p-2.5 focus:outline-none  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-sky-500 dark:focus:border-sky-500"
-                                        placeholder="Search name..." required />
-                                </div>
-                                <button type="submit"
-                                    class="py-2 px-3 ms-2 text-sm font-medium text-white bg-sky-800 rounded-lg  hover:bg-sky-600 focus:ring-4 focus:outline-none focus:ring-sky-300 dark:bg-sky-600 dark:hover:bg-sky-700 dark:focus:ring-sky-800">
-                                    <fa :icon="['fas', 'magnifying-glass']" />
 
-                                    <span class="sr-only">Search</span>
-                                </button>
-                            </form>
-
-                        </div>
 
 
 
@@ -84,40 +79,61 @@
 
                     </div>
                     <TableComponent
-                        :headers="['#', 'Penanda Tangan', 'Nomor Naskah', 'Status Naskah', 'File Naskah', '']"
-                        @edit="toggleModalUpdate()">
-                        <tr v-for="(item, index) in datas" :key="index" class="hover:bg-slate-200"
+                        :headers="['#', 'Penanda Tangan', 'Nomor Naskah', 'Jenis Naskah', 'Klasifikasi', 'Tujuan', 'Perihal', 'Status Naskah', 'File Naskah', 'Update File']">
+                        <tr v-for="(item, index) in datas" :key="index" class="hover:bg-slate-200 text-sm"
                             :class="[index % 2 == 0 ? 'bg-gray-50' : 'bg-white']">
                             <td class="py-1 px-1 text-gray-700"> {{ index + 1 }} </td>
                             <td class="py-1 px-1 text-gray-700">
-                                {{ item.jabatan.nama }}
+                                <p>
+                                    <span v-if="item.plhs != null">
+                                        a.n. Direktur Politeknik Pariwisata Bali <br>
+                                        {{ item.plhs.jabatan.nama }}
+                                    </span>
+                                    <span v-else>
+                                        {{ item.jabatan.nama }}
+                                    </span>
+                                </p>
                             </td>
                             <td class="py-1 px-1 text-gray-700">
                                 {{ item.nomor_surat }}
                             </td>
+                            <td class="py-1 px-1 text-gray-700">
+                                {{ item.jenis_naskah.nama }}
+                            </td>
+                            <td class="py-1 px-1 text-gray-700">
+                                {{ item.klasifikasi }}
+                            </td>
+                            <td class="py-1 px-1 text-gray-700">
+                                {{ item.tujuan }}
+                            </td>
+                            <td class="py-1 px-1 text-gray-700">
+                                {{ item.perihal }}
+                            </td>
                             <td class="py-1 px-1 text-gray-700 text-center">
                                 <span
-                                    :class="[item.status == 'pending' ? 'bg-yellow-500 text-sm text-white p-1 rounded-lg' : item.status == 'approved' ? 'bg-green-500 text-sm text-white p-1 rounded-sm' : 'bg-red-500 text-sm text-white p-1 rounded-sm']">
+                                    :class="[item.status == 'pending' ? 'bg-yellow-500 text-sm text-white p-1 rounded-lg' : item.status == 'approved' ? 'bg-green-500 text-sm text-white p-1 rounded-lg' : 'bg-red-500 text-sm text-white p-1 rounded-lg']">
                                     {{ item.status }}
                                 </span>
 
                             </td>
 
-                            <td class="py-1 px-1 text-gray-700 inline-flex">
+                            <td class="py-1 px-1 text-gray-700 text-center">
                                 <div class="p-4">
                                     <!-- <p>File available for download:</p> -->
                                     <a v-if="item.filename" :href="item.filename" target="_blank" class="mb-2 text-white py-2 px-3 bg-green-700 rounded-md hover:bg-green-500
                                         ">
-                                        View File
+                                        <fa :icon="['fas', 'eye']" />
                                     </a>
-                                    <button @click="updatedFile(item.id)"
-                                        class="ml-2 text-white bg-orange-600 cursor-pointer rounded-md py-2 px-3 hover:bg-orange-400">
-                                        Update File
-                                    </button>
+
                                 </div>
+
                             </td>
-                            <td v-show="updateFiled">
-                                <FileUpdate :itemId="item.id" />
+                            <td class="py-1 px-1 text-gray-700 text-center">
+                                <button @click="toggleModalUpdate(item.id)"
+                                    class="ml-2 text-white bg-orange-600 cursor-pointer rounded-md py-2 px-3 hover:bg-orange-400">
+                                    <fa :icon="['fas', 'file-pen']" />
+
+                                </button>
 
                             </td>
 
@@ -127,12 +143,25 @@
                 </div>
                 <Sekeleton :is_loading="is_loading" />
             </main>
+            <Pagination :pagination="pagination" :totalItems="datas.length" :pageLimit="4" @pageChange="loadNomor" />
         </div>
     </div>
 
 
 
     <!-- Modal-->
+
+
+    <Modal :modalActive="modalActive" @close-modal="toggleModal">
+        <div class="bg-white shadow-md p-4 overscroll-contain">
+            <h1 class="font-semibold text-xl border-b border-gray-300 pb-2" v-if="modalCreate">Tambah Naskah</h1>
+            <h1 class="font-semibold text-xl border-b border-gray-300 pb-2" v-if="modalUpdate">Update Naskah</h1>
+
+            <FileUpdate :itemId="currentItemId" />
+
+
+        </div>
+    </Modal>
 
 
 
@@ -147,7 +176,9 @@ import Sekeleton from '../Parts/Sekeleton.vue';
 import NotFound from '../Parts/404.vue'
 import router from "../../router";
 import FileUpdate from '../Parts/UpdateFile.vue';
-
+import Header from "../Parts/Header.vue"
+import Pagination from '../Parts/Pagination.vue';
+import Modal from "../Parts/Modal.vue"
 
 const isSidebarOpen = ref(false)
 
@@ -163,13 +194,14 @@ const is_loading = ref(null)
 const not_found = ref(null)
 const updateFiled = ref(false)
 const showTooltip = ref(false)
+const pagination = ref([])
 
-console.log(showTooltip.value)
-const updatedFile = (id) => {
+const statusModal = ref(false)
+const modalActive = ref(false)
+const modalUpdate = ref(null)
+const modalCreate = ref(null)
 
-    updateFiled.value = !updateFiled.value
-
-}
+const currentItemId = ref(null);
 
 
 function toggleSidebar() {
@@ -180,6 +212,7 @@ function toggleSidebar() {
 
 const handleFillter = (page) => {
     datas.value = []
+    not_found.value = false
     setTimeout(() => {
 
         loadNomor(page)
@@ -204,26 +237,18 @@ function getDefaultLastDateOfYear() {
 
 
 
-
-const paginationLinks = computed(() => {
-    const totalPages = pagination.value.last_page;
-    return Array.from({ length: totalPages }, (_, i) => i + 1);
-});
-
-
-
-
-const loadNomor = async () => {
+const loadNomor = async (page = 1) => {
     is_loading.value = true
     not_found.value = false
-    await axios.get("/api/user-nomor-selesai", {
+    await axios.get(`/api/user-nomor-selesai?page=${page}`, {
         headers: {
             Authorization: "Bearer" + localStorage.getItem("token"),
         }, params: fillter
     }).then((res) => {
 
         setTimeout(() => {
-            datas.value = res.data.data;
+            datas.value = res.data.data.data
+            pagination.value = res.data.data
             is_loading.value = false
 
             datas.value.length < 1 ? not_found.value = true : not_found.value = false;
@@ -245,6 +270,27 @@ const loadNomor = async () => {
     });
 };
 loadNomor();
+
+
+const toggleModal = () => {
+    modalActive.value = !modalActive.value
+    errors.value = {}
+}
+// const toggleModalPlus = () => {
+//     form.value = {}
+//     statusModal.value = true
+//     modalCreate.value = true
+//     modalActive.value = !modalActive.value
+//     modalUpdate.value = false
+// }
+const toggleModalUpdate = (id) => {
+    statusModal.value = false
+    modalUpdate.value = true
+    modalActive.value = !modalActive.value
+    modalCreate.value = false
+    currentItemId.value = id
+    console.log(currentItemId.value)
+}
 
 </script>
 

@@ -5,16 +5,12 @@ namespace App\Exports;
 use App\Models\Nomor;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\FromCollection;
-use Illuminate\Http\Request;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithMapping;
 
-class NomorExport implements FromCollection, WithHeadings, WithMapping
+class NaskahCanceledExport implements FromCollection
 {
     /**
      * @return \Illuminate\Support\Collection
      */
-
 
     protected $dateStart;
     protected $dateEnd;
@@ -40,11 +36,8 @@ class NomorExport implements FromCollection, WithHeadings, WithMapping
                 },
                 'JenisNaskah' => function ($query) {
                     $query->select('id', 'nama');
-                },
-                'plhs.jabatan' => function ($query) {
-                    $query->select('id', 'nama');
                 }
-            ]);
+            ])->onlyTrashed();
 
         if ($this->jabatanName) {
             $query->whereHas('jenisNaskah', function ($q) {
@@ -70,8 +63,6 @@ class NomorExport implements FromCollection, WithHeadings, WithMapping
 
     public function map($nomor): array
     {
-        // dd($nomor->plhs->jabatan->nama);
-
         // dd($nomor->users->nama_pengguna);
         // Determine the status based on conditions
         if ($nomor->filename === null && $nomor->deleted_at !== null) {
@@ -82,15 +73,9 @@ class NomorExport implements FromCollection, WithHeadings, WithMapping
             $status = $nomor->status;
         }
 
-        if ($nomor->plhs->jabatan->nama !== null) {
-            $penandaTangan = 'a.n Direktur Politeknik Pariwisata Bali ' . $nomor->plhs->jabatan->nama;
-        } else {
-            $penandaTangan = $nomor->jabatan->nama;
-        }
-
         return [
             $nomor->users->nama_pengguna,  // Nama pengguna dari relasi
-            $penandaTangan,      // Nama jabatan dari relasi
+            $nomor->jabatan->nama,         // Nama jabatan dari relasi
             $nomor->jenisNaskah->nama,         // Nama jenis naskah dari relasi
             $nomor->nomor_surat,           // Kolom dari model Nomor
             $nomor->tanggal_surat,         // Kolom dari model Nomor

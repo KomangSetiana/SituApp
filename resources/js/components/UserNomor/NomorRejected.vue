@@ -6,14 +6,13 @@
 
         <!-- Main content -->
         <div class="flex-1 flex flex-col  h-screen overflow-y-auto">
-            <Header :title="'Naskah Selesai'" @toggleSidebar="toggleSidebar" />
+            <Header :title="'Naskah Ditolak'" @toggleSidebar="toggleSidebar" />
 
             <main class="flex-1 p-6">
                 <div class="w-full">
                     <div class="flex flex-wrap md:justify-between w-full">
                         <div class="flex items-end">
-
-                            <form @submit.prevent=" handleFillter()" class="flex items-center max-w-sm mr-1 ">
+                            <form @submit.prevent=" handleFillter()" class="flex items-center max-w-sm mr-4 ">
                                 <label for="simple-search" class="sr-only">Search</label>
                                 <div class="relative w-full">
                                     <div
@@ -30,11 +29,12 @@
 
                                     <span class="sr-only">Search</span>
                                 </button>
-
                             </form>
 
                         </div>
                         <div class="flex items-end">
+
+
                             <form @submit.prevent=" handleFillter()"
                                 class="flex items-center max-w-sm mr-4 md:mb-0 mb-2">
                                 <!-- Start Date -->
@@ -54,20 +54,32 @@
                                 </div>
 
                                 <!-- Filter Button -->
+                                <div class="relative inline-block">
 
-                                <button type="submit"
-                                    class="flex items-end px-2 py-2 bg-sky-800 text-white text-sm rounded-md shadow hover:bg-sky-600">
-                                    <fa :icon="['fas', 'filter']" />
-                                </button>
+                                    <button type="submit" @mouseenter="showTooltip = true"
+                                        @mouseleave="showTooltip = false"
+                                        class="flex items-end px-2 py-2 bg-sky-800 text-white text-sm rounded-md shadow hover:bg-sky-600">
+                                        <fa :icon="['fas', 'filter']" />
+                                    </button>
+                                    <!-- Tooltip -->
+                                    <div v-if="showTooltip"
+                                        class="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-gray-700 text-white text-xs rounded-md px-2 py-1">
+                                        Fillter tanggal
+                                    </div>
+                                </div>
                             </form>
-
                         </div>
+
+
+
+
+
+
 
 
                     </div>
                     <TableComponent
-                        :headers="['#', 'Penanda Tangan', 'Pembuat Nomor', 'Nomor Naskah', 'Jenis Naskah', 'Klasifikasi', 'Tanggal', 'Status', 'tujuan', 'perihal', 'File Naskah', 'Proses By', 'Action']"
-                        @edit="toggleModalUpdate()">
+                        :headers="['#', 'Penanda Tangan', 'Nomor Naskah', 'Jenis Naskah', 'Klasifikasi', 'Tujuan', 'Perihal', 'Status Naskah', 'File Naskah', 'Update File']">
                         <tr v-for="(item, index) in datas" :key="index" class="hover:bg-slate-200 text-sm"
                             :class="[index % 2 == 0 ? 'bg-gray-50' : 'bg-white']">
                             <td class="py-1 px-1 text-gray-700"> {{ index + 1 }} </td>
@@ -83,28 +95,14 @@
                                 </p>
                             </td>
                             <td class="py-1 px-1 text-gray-700">
-                                {{ item.users.nama_pengguna }}
-                            </td>
-                            <td class="py-1 px-1 text-gray-700">
                                 {{ item.nomor_surat }}
                             </td>
                             <td class="py-1 px-1 text-gray-700">
                                 {{ item.jenis_naskah.nama }}
                             </td>
                             <td class="py-1 px-1 text-gray-700">
-                                {{ item.klasifikasis.nama }}
+                                {{ item.klasifikasi }}
                             </td>
-                            <td class="py-1 px-1 text-gray-700">
-                                {{ item.tanggal_surat }}
-                            </td>
-                            <td class="py-1 px-1 text-gray-700 text-center">
-                                <span
-                                    :class="[item.status == 'pending' ? 'bg-yellow-500 text-sm text-white p-1 rounded-lg' : item.status == 'approved' ? 'bg-green-500 text-sm text-white p-1 rounded-lg' : 'bg-red-500 text-sm text-white p-1 rounded-lg']">
-                                    {{ item.status }}
-                                </span>
-
-                            </td>
-
                             <td class="py-1 px-1 text-gray-700">
                                 {{ item.tujuan }}
                             </td>
@@ -112,23 +110,31 @@
                                 {{ item.perihal }}
                             </td>
                             <td class="py-1 px-1 text-gray-700 text-center">
-                                <div>
-                                    <a v-if="item.filename" :href="item.filename" target="_blank" class="text-white py-1 px-2 bg-green-700 rounded-md hover:bg-green-500
-                                            ">
+                                <span
+                                    :class="[item.status == 'pending' ? 'bg-yellow-500 text-sm text-white p-1 rounded-lg' : item.status == 'approved' ? 'bg-green-500 text-sm text-white p-1 rounded-sm' : 'bg-red-500 text-sm text-white p-1 rounded-sm']">
+                                    {{ item.status }}
+                                </span>
+
+                            </td>
+
+                            <td class="py-1 px-1 text-gray-700 text-center">
+                                <div class="p-4">
+                                    <!-- <p>File available for download:</p> -->
+                                    <a v-if="item.filename" :href="item.filename" target="_blank" class="mb-2 text-white py-2 px-3 bg-green-700 rounded-md hover:bg-green-500
+                                        ">
                                         <fa :icon="['fas', 'eye']" />
                                     </a>
-                                    <p v-if="!item.filename">belum upload file</p>
+
                                 </div>
-                            </td>
-                            <td class="py-1 px-1 text-gray-700">
-                                {{ item.proses_by }}
+
                             </td>
                             <td class="py-1 px-1 text-gray-700 text-center">
-                                <button
-                                    class="text-white bg-yellow-600 px-2 py-1 rounded hover:bg-yellow-700 transition duration-300"
-                                    @click="toggleModal(form = item)">
+                                <button @click="toggleModalUpdate(item.id)"
+                                    class="ml-2 text-white bg-orange-600 cursor-pointer rounded-md py-2 px-3 hover:bg-orange-400">
                                     <fa :icon="['fas', 'file-pen']" />
+
                                 </button>
+
                             </td>
 
                         </tr>
@@ -137,7 +143,6 @@
                 </div>
                 <Sekeleton :is_loading="is_loading" />
             </main>
-
             <Pagination :pagination="pagination" :totalItems="datas.length" :pageLimit="4" @pageChange="loadNomor" />
         </div>
     </div>
@@ -145,45 +150,19 @@
 
 
     <!-- Modal-->
+
+
     <Modal :modalActive="modalActive" @close-modal="toggleModal">
         <div class="bg-white shadow-md p-4 overscroll-contain">
-            <h1 class="font-semibold text-xl border-b border-gray-300 pb-2">Update Status & Tipe </h1>
+            <h1 class="font-semibold text-xl border-b border-gray-300 pb-2" v-if="modalCreate">Tambah Naskah</h1>
+            <h1 class="font-semibold text-xl border-b border-gray-300 pb-2" v-if="modalUpdate">Update Naskah</h1>
 
-            <form @submit.prevent="updateStatusAndTipe()">
-                <div class="grid gap-6 mb-6 md:grid-cols-1 md:w-96">
-                    <div>
-                        <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                            Status</label>
-                        <select id="status" v-model="form.status"
-                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                            <option value="pending">Pending</option>
-                            <option value="rejected">Reject</option>
-                            <option value="approved">Approved</option>
-                        </select>
+            <FileUpdate :itemId="currentItemId" />
 
-                    </div>
-                    <div>
-                        <label for="tipe" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                            Tipe</label>
-                        <select id="tipe" v-model="form.tipe"
-                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                            <option selected>Tipe</option>
-                            <option value="1">Private</option>
-                            <option value="0">Publik</option>
-                        </select>
-
-                    </div>
-
-                </div>
-
-
-                <button type="submit"
-                    class="text-white bg-sky-700 hover:bg-sky-800 focus:ring-4 focus:outline-none focus:ring-sky-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-sky-600 dark:hover:bg-sky-700 dark:focus:ring-sky-800">
-                    Update</button>
-            </form>
 
         </div>
     </Modal>
+
 
 
 </template>
@@ -196,11 +175,12 @@ import Swal from 'sweetalert2'
 import Sekeleton from '../Parts/Sekeleton.vue';
 import NotFound from '../Parts/404.vue'
 import router from "../../router";
+import FileUpdate from '../Parts/UpdateFile.vue';
 import Header from "../Parts/Header.vue"
 import Pagination from '../Parts/Pagination.vue';
 import Modal from "../Parts/Modal.vue"
-import axios from 'axios';
 
+const isSidebarOpen = ref(false)
 
 const fillter = {
     search: "",
@@ -208,17 +188,27 @@ const fillter = {
     dateEnd: getDefaultLastDateOfYear()
 }
 
-const modalActive = ref(false)
+
 const datas = ref([])
 const is_loading = ref(null)
 const not_found = ref(null)
-const isSidebarOpen = ref(false)
+const updateFiled = ref(false)
+const showTooltip = ref(false)
 const pagination = ref([])
+
+const statusModal = ref(false)
+const modalActive = ref(false)
+const modalUpdate = ref(null)
+const modalCreate = ref(null)
+
+const currentItemId = ref(null);
 
 
 function toggleSidebar() {
     isSidebarOpen.value = !isSidebarOpen.value;
 }
+
+
 
 const handleFillter = (page) => {
     datas.value = []
@@ -245,29 +235,19 @@ function getDefaultLastDateOfYear() {
     return `${year}-${month}-${day}`;
 }
 
-const form = ref({
-    id: '',
-    tipe: '',
-    status: ''
-})
-
-
-
-
-
 
 
 const loadNomor = async (page = 1) => {
     is_loading.value = true
     not_found.value = false
-    await axios.get(`/api/nomor-selesai?page=${page}`, {
+    await axios.get(`/api/user-nomor-rejected?page=${page}`, {
         headers: {
             Authorization: "Bearer" + localStorage.getItem("token"),
         }, params: fillter
     }).then((res) => {
 
         setTimeout(() => {
-            datas.value = res.data.data.data;
+            datas.value = res.data.data.data
             pagination.value = res.data.data
             is_loading.value = false
 
@@ -292,70 +272,25 @@ const loadNomor = async (page = 1) => {
 loadNomor();
 
 
-function exportExcel() {
-    axios({
-        url: `/api/export-nomor?start_date=${fillter.dateStart}&end_date=${fillter.dateEnd}`, // URL sesuai dengan route export di Laravel
-        method: 'GET',
-        responseType: 'blob',
-
-        headers: {
-            Authorization: "Bearer" + localStorage.getItem("token"),
-        },
-    } // Ini penting agar respons diterima sebagai file
-    )
-        .then((response) => {
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `nomor_naskah_${fillter.dateStart}_to_${fillter.dateEnd}.xlsx`); // Nama file Excel
-            document.body.appendChild(link);
-            link.click();
-        })
-        .catch((error) => {
-            console.error('Export failed:', error);
-        });
-}
-
-
-
-
 const toggleModal = () => {
-
     modalActive.value = !modalActive.value
+    errors.value = {}
 }
-
-const updateStatusAndTipe = async () => {
-    datas.value = []
-    await axios.put('/api/update/status-tipe/' + form.value.id, {
-        status: form.value.status,
-        tipe: form.value.tipe
-    }, {
-        headers: {
-            Authorization: "Bearer " + localStorage.getItem("token"),
-
-        }
-    }).then(() => {
-        loadNomor()
-        modalActive.value = false
-        const Toast = Swal.mixin({
-            toast: true,
-            position: "top-end",
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-                toast.onmouseenter = Swal.stopTimer;
-                toast.onmouseleave = Swal.resumeTimer;
-            }
-        });
-        Toast.fire({
-            icon: "success",
-            title: "Data has been updated"
-        });
-
-    })
+// const toggleModalPlus = () => {
+//     form.value = {}
+//     statusModal.value = true
+//     modalCreate.value = true
+//     modalActive.value = !modalActive.value
+//     modalUpdate.value = false
+// }
+const toggleModalUpdate = (id) => {
+    statusModal.value = false
+    modalUpdate.value = true
+    modalActive.value = !modalActive.value
+    modalCreate.value = false
+    currentItemId.value = id
+    console.log(currentItemId.value)
 }
-
 
 </script>
 
@@ -410,5 +345,9 @@ const updateStatusAndTipe = async () => {
 /* Menimpa style default Vue Multiselect untuk opsi yang dipilih */
 .custom-multiselect .multiselect__single {
     background-color: #0d2482;
+}
+
+.tooltip {
+    transition: opacity 0.3s ease;
 }
 </style>

@@ -6,16 +6,8 @@
 
         <!-- Main content -->
         <div class="flex-1 flex flex-col  h-screen overflow-y-auto">
-            <header class="flex justify-between items-center bg-white shadow-md p-4">
-                <div class="text-2xl text-sky-900 font-bold">Pelaksana Harian(Plh)</div>
-                <button @click="toggleSidebar" class="md:hidden text-sky-800 focus:outline-none">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
-                </button>
-            </header>
+            <Header :title="'Pelaksana Harian (Plh)'" @toggleSidebar="toggleSidebar" />
+
             <main class="flex-1 p-6">
                 <div class="w-full">
                     <div class="flex justify-between w-full">
@@ -77,6 +69,7 @@
                 </div>
                 <Sekeleton :is_loading="is_loading" />
             </main>
+            <Pagination :pagination="pagination" :totalItems="plhs.length" :pageLimit="4" @pageChange="loadPlh" />
         </div>
     </div>
 
@@ -145,6 +138,8 @@ import dateToday from '../../helpers/dateToday'
 import 'vue-multiselect/dist/vue-multiselect.css'
 import Multiselect from 'vue-multiselect'
 import router from "../../router";
+import Header from "../Parts/Header.vue"
+import Pagination from "../Parts/Pagination.vue"
 
 const isSidebarOpen = ref(false)
 const statusModal = ref(false)
@@ -153,6 +148,8 @@ const modalUpdate = ref(null)
 const modalCreate = ref(null)
 const errors = ref({})
 const plhs = ref([]);
+const pagination = ref([])
+
 
 const fillter = {
     search: ""
@@ -178,6 +175,7 @@ const { jabatans, loadJabatan } = getJabatan()
 loadJabatan()
 
 const handleFillter = () => {
+    not_found.value = false
     loadPlh()
 }
 
@@ -192,7 +190,8 @@ const loadPlh = async () => {
     }).then((res) => {
 
         setTimeout(() => {
-            plhs.value = res.data.data;
+            plhs.value = res.data.data.data;
+            pagination.value = res.data.data;
             is_loading.value = false;
 
             plhs.value.length < 1
@@ -242,6 +241,9 @@ const createPlh = async () => {
             title: "Data has been saved"
         });
     }).catch((err) => {
+        if (err.response && err.response.status === 422) {
+            errors.value = err.response.data.errors
+        }
         if (
             err.response.data.message == "Token not found or invalid" &&
             err.response.status == 401
@@ -306,13 +308,13 @@ const updatePlh = async () => {
 const deletePLh = (id) => {
 
     Swal.fire({
-        title: "Are you sure?",
-        text: "You won't be able to revert this!",
+        title: "Apakah anda yakin?",
+        text: "Anda tidak akan bisa mengembalikan data ini!",
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, delete it!"
+        confirmButtonText: "Iya,Hapus!"
     }).then((result) => {
         if (result.isConfirmed) {
 
@@ -323,8 +325,8 @@ const deletePLh = (id) => {
             }).then(() => {
                 loadPlh()
                 Swal.fire({
-                    title: "Deleted!",
-                    text: "Your file has been deleted.",
+                    title: "Terhapus!",
+                    text: "Data anda telah dihapus.",
                     icon: "success"
                 });
             }).catch((err) => {

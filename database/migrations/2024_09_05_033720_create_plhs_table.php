@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('plhs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('jabatan_id')->constrained('jabatans')->onDelete('cascade');
-            $table->date('tanggal');
+            $table->date('tanggal')->unique();
             $table->timestamps();
         });
     }

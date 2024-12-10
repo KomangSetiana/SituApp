@@ -6,19 +6,36 @@
 
         <!-- Main content -->
         <div class="flex-1 flex flex-col  h-screen overflow-y-auto">
-            <header class="flex justify-between items-center bg-sky-900 shadow-md p-4">
-                <div class="text-2xl text-yellow-400 font-bold">Arsip Naskah</div>
-                <button @click="toggleSidebar" class="md:hidden text-yellow-400 focus:outline-none">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
-                </button>
-            </header>
+            <Header :title="'Arsip Naskah'" @toggleSidebar="toggleSidebar" />
+
             <main class="flex-1 p-6">
                 <div class="w-full">
                     <div class="flex flex-wrap md:justify-between w-full">
+                        <div class="flex items-end">
+
+                            <form @submit.prevent=" handleFillter()" class="flex items-center max-w-sm mr-1 ">
+                                <label for="simple-search" class="sr-only">Search</label>
+                                <div class="relative w-full">
+                                    <div
+                                        class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none text-gray-500">
+                                        <fa :icon="['fas', 'magnifying-glass']" />
+                                    </div>
+                                    <input type="text" v-model="fillter.search" id="simple-search"
+                                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full ps-10 p-2.5 focus:outline-none  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-sky-500 dark:focus:border-sky-500"
+                                        placeholder="Search name..." required />
+                                </div>
+                                <button type="submit"
+                                    class="py-2 px-3 ms-2 text-sm font-medium text-white bg-sky-800 rounded-lg  hover:bg-sky-600 focus:ring-4 focus:outline-none focus:ring-sky-300 dark:bg-sky-600 dark:hover:bg-sky-700 dark:focus:ring-sky-800">
+                                    <fa :icon="['fas', 'magnifying-glass']" />
+
+                                    <span class="sr-only">Search</span>
+                                </button>
+
+                            </form>
+                            <button @click="toggleModal()" class="px-2 py-1 text-white cursor-pointer rounded-md">
+                                <fa :icon="['fas', 'download']" class="text-sky-800" />
+                            </button>
+                        </div>
                         <div class="flex items-end">
                             <form @submit.prevent=" handleFillter()"
                                 class="flex items-center max-w-sm mr-4 md:mb-0 mb-2">
@@ -45,44 +62,27 @@
                                     <fa :icon="['fas', 'filter']" />
                                 </button>
                             </form>
-                        </div>
-
-                        <div class="flex items-end">
-                            <form @submit.prevent=" handleFillter()" class="flex items-center max-w-sm mr-4 ">
-                                <label for="simple-search" class="sr-only">Search</label>
-                                <div class="relative w-full">
-                                    <div
-                                        class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none text-gray-500">
-                                        <fa :icon="['fas', 'magnifying-glass']" />
-                                    </div>
-                                    <input type="text" v-model="fillter.search" id="simple-search"
-                                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full ps-10 p-2.5 focus:outline-none  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-sky-500 dark:focus:border-sky-500"
-                                        placeholder="Search name..." required />
-                                </div>
-                                <button type="submit"
-                                    class="py-2 px-3 ms-2 text-sm font-medium text-white bg-sky-800 rounded-lg  hover:bg-sky-600 focus:ring-4 focus:outline-none focus:ring-sky-300 dark:bg-sky-600 dark:hover:bg-sky-700 dark:focus:ring-sky-800">
-                                    <fa :icon="['fas', 'magnifying-glass']" />
-
-                                    <span class="sr-only">Search</span>
-                                </button>
-                            </form>
 
                         </div>
-
-
-
-
 
 
                     </div>
                     <TableComponent
                         :headers="['#', 'Penanda Tangan', 'Pembuat Nomor', 'Nomor Naskah', 'tujuan', 'perihal', 'File Naskah',]"
                         @edit="toggleModalUpdate()">
-                        <tr v-for="(item, index) in datas" :key="index" class="hover:bg-slate-200"
+                        <tr v-for="(item, index) in datas" :key="index" class="hover:bg-slate-200 text-sm"
                             :class="[index % 2 == 0 ? 'bg-gray-50' : 'bg-white']">
                             <td class="py-1 px-1 text-gray-700"> {{ index + 1 }} </td>
                             <td class="py-1 px-1 text-gray-700">
-                                {{ item.jabatan.nama }}
+                                <p>
+                                    <span v-if="item.plhs != null">
+                                        a.n. Direktur Politeknik Pariwisata Bali <br>
+                                        {{ item.plhs.jabatan.nama }}
+                                    </span>
+                                    <span v-else>
+                                        {{ item.jabatan.nama }}
+                                    </span>
+                                </p>
                             </td>
                             <td class="py-1 px-1 text-gray-700">
                                 {{ item.users.nama_pengguna }}
@@ -112,12 +112,73 @@
                 </div>
                 <Sekeleton :is_loading="is_loading" />
             </main>
+
+            <Pagination :pagination="pagination" :totalItems="datas.length" :pageLimit="4" @pageChange="loadNomor" />
         </div>
     </div>
 
 
 
+
     <!-- Modal-->
+    <Modal :modalActive="modalActive" @close-modal="toggleModal">
+        <div class="bg-white shadow-md p-4 overscroll-contain">
+            <h1 class="font-semibold text-xl border-b border-gray-300 pb-2">Fillter Export Excel </h1>
+
+            <form @submit.prevent="exportExcel()">
+                <div class="grid gap-6 mb-6 md:grid-cols-1 md:w-96">
+
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-gray-700">
+                            Mulai Tanggal
+                        </label>
+                        <input v-model="fillter.dateStart" type="date"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md  focus:outline-none focus:ring focus:ring-sky-500"
+                            required />
+
+                    </div>
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-gray-700">
+                            Sampai Tanggal
+                        </label>
+                        <input v-model="fillter.dateEnd" type="date"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md  focus:outline-none focus:ring focus:ring-sky-500"
+                            required />
+
+                    </div>
+                    <div>
+                        <label for="Jabatan" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            Jabatan</label>
+                        <select id="Jabatan" v-model="fillter.jabatanName"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                            <option selected value="">Semua</option>
+                            <option v-for="jabatan in jabatans" :key="jabatan.id" :value="jabatan.nama">
+                                {{ jabatan.nama }}</option>
+                        </select>
+
+                    </div>
+                    <div>
+                        <label for="Jenis Naskah" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            Jenis Naskah</label>
+                        <select id="Jenis Naskah" v-model="fillter.jenisNaskahName"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                            <option selected value="">Semua</option>
+                            <option v-for="jenisNaskah in jenisNaskahs" :key="jenisNaskah.id" :value="jenisNaskah.nama">
+                                {{ jenisNaskah.nama }}</option>
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <button type="submit"
+                    class="text-white bg-sky-700 hover:bg-sky-800 focus:ring-4 focus:outline-none focus:ring-sky-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-sky-600 dark:hover:bg-sky-700 dark:focus:ring-sky-800">
+                    Export</button>
+            </form>
+
+        </div>
+    </Modal>
 
 
 
@@ -131,13 +192,16 @@ import Swal from 'sweetalert2'
 import Sekeleton from '../Parts/Sekeleton.vue';
 import NotFound from '../Parts/404.vue'
 import router from "../../router";
-
-
+import Header from "../Parts/Header.vue"
+import Pagination from '../Parts/Pagination.vue';
+import Modal from "../Parts/Modal.vue"
 
 const fillter = {
     search: "",
     dateStart: getDefaultFirstDateOfYear(),
-    dateEnd: getDefaultLastDateOfYear()
+    dateEnd: getDefaultLastDateOfYear(),
+    jabatanName: "",
+    jenisNaskahName: ""
 }
 
 
@@ -145,8 +209,16 @@ const datas = ref([])
 const is_loading = ref(null)
 const not_found = ref(null)
 const isSidebarOpen = ref(false)
+const pagination = ref([])
 
 
+const modalActive = ref(null)
+
+
+const toggleModal = () => {
+
+    modalActive.value = !modalActive.value
+}
 
 function toggleSidebar() {
     isSidebarOpen.value = !isSidebarOpen.value;
@@ -154,6 +226,7 @@ function toggleSidebar() {
 
 const handleFillter = (page) => {
     datas.value = []
+    not_found.value = false
     setTimeout(() => {
 
         loadNomor(page)
@@ -179,25 +252,23 @@ function getDefaultLastDateOfYear() {
 
 
 
-const paginationLinks = computed(() => {
-    const totalPages = pagination.value.last_page;
-    return Array.from({ length: totalPages }, (_, i) => i + 1);
-});
 
 
 
 
-const loadNomor = async () => {
+
+const loadNomor = async (page = 1) => {
     is_loading.value = true
     not_found.value = false
-    await axios.get("/api/arsip-naskah", {
+    await axios.get(`/api/arsip-naskah?page=${page}`, {
         headers: {
             Authorization: "Bearer" + localStorage.getItem("token"),
         }, params: fillter
     }).then((res) => {
 
         setTimeout(() => {
-            datas.value = res.data.data;
+            datas.value = res.data.data.data;
+            pagination.value = res.data.data
             is_loading.value = false
 
             datas.value.length < 1 ? not_found.value = true : not_found.value = false;
@@ -221,6 +292,33 @@ const loadNomor = async () => {
 loadNomor();
 
 
+function exportExcel() {
+    axios({
+        url: `/api/export-approved-nomor?start_date=${fillter.dateStart}&end_date=${fillter.dateEnd}&jabatan_name=${fillter.jabatanName}&jenis_naskah_name=${fillter.jenisNaskahName}`, // URL sesuai dengan route export di Laravel
+        method: 'GET',
+        responseType: 'blob', // Handle response as file
+
+        headers: {
+            Authorization: "Bearer " + localStorage.getItem("token"),
+        },
+    })
+        .then((response) => {
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `nomor_naskah_${fillter.dateStart}_to_${fillter.dateEnd}.xlsx`); // Set file name
+            document.body.appendChild(link);
+            link.click();
+
+            // Clean up URL object
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(link);
+            modalActive.value = false
+        })
+        .catch((error) => {
+            console.error('Export failed:', error);
+        });
+}
 
 
 

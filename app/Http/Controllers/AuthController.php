@@ -113,4 +113,22 @@ class AuthController extends Controller
             return response()->json(['error' => 'something wrong'], 500);
         }
     }
+
+    public function getAlluser()
+    {
+        // Guzzle Client untuk memanggil API eksternal
+        $client = new Client();
+        try {
+            // Request ke API eksternal untuk mendapatkan semua user
+            $response = $client->get('https://xapi.ppb.ac.id/index.php/api/pengguna_singkat?kata-ajaib=pitz', [
+                'auth' => ['pitawt', 'ppb.123'],
+                'verify' => false // Menggunakan Basic Auth
+            ]);
+
+            $users = json_decode($response->getBody(), true);
+            return    $this->sendResponse($users["data"], 'success');
+        } catch (Exception $e) {
+            return response()->json(['error' => 'something wrong'], 500);
+        }
+    }
 }

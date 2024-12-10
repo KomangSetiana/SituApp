@@ -10,7 +10,7 @@ class JenisNaskah extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ["nama", "kode", "naskah_id"];
+    protected $fillable = ["nama", "kode", "naskah_id", "akses_naskah", "has_direktur"];
 
 
     public function naskah()

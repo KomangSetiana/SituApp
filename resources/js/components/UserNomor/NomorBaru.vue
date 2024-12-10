@@ -6,16 +6,8 @@
 
         <!-- Main content -->
         <div class="flex-1 flex flex-col  h-screen overflow-y-auto">
-            <header class="flex justify-between items-center bg-sky-900 shadow-md p-4">
-                <div class="text-2xl text-yellow-400 font-bold">Nomor Naskah</div>
-                <button @click="toggleSidebar" class="md:hidden text-yellow-400 focus:outline-none">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
-                </button>
-            </header>
+            <Header :title="'Nomor Baru'" @toggleSidebar="toggleSidebar" />
+
             <main class="flex-1 p-6">
                 <div class="w-full">
                     <div class="flex justify-between w-full">
@@ -53,26 +45,66 @@
                         </div>
                     </div>
                     <TableComponent
-                        :headers="['#', 'Penanda Tangan', 'Jenis Naskah', 'Nomor Naskah', 'Tanggal', 'Actions']"
+                        :headers="['#', 'Penanda Tangan', 'Pembuat Nomor', 'Nomor Naskah', 'Jenis Naskah', 'Klasifikasi', 'Tanggal', 'tujuan', 'perihal', 'Upload File', 'Proses By', 'Actions']"
                         @edit="toggleModalUpdate()">
-                        <tr v-for="(item, index) in datas" :key="index" class="hover:bg-slate-200"
+                        <tr v-for="(item, index) in datas" :key="index" class="hover:bg-slate-200 text-sm"
                             :class="[index % 2 == 0 ? 'bg-gray-50' : 'bg-white']">
                             <td class="py-1 px-1 text-gray-700"> {{ index + 1 }} </td>
                             <td class="py-1 px-1 text-gray-700">
-                                {{ item.jabatan.nama }}
+                                <p>
+                                    <span v-if="item.plhs != null">
+                                        a.n. Direktur Politeknik Pariwisata Bali <br>
+                                        {{ item.plhs.jabatan.nama }}
+                                    </span>
+                                    <span v-else>
+                                        {{ item.jabatan.nama }}
+                                    </span>
+                                </p>
                             </td>
+                            <td class="py-1 px-1 text-gray-700">
+                                {{ item.users.nama_pengguna }}
+                            </td>
+                            <td class="py-1 px-1 text-gray-700">
+                                <span> <button @click="copyToClipboard(item.nomor_surat)" class=" inline-block">
+                                        {{ item.nomor_surat }}
+                                        <fa :icon="['fas', 'copy']" />
+                                    </button></span>
+
+                            </td>
+
                             <td class="py-1 px-1 text-gray-700">
                                 {{ item.jenis_naskah.nama }}
                             </td>
                             <td class="py-1 px-1 text-gray-700">
-                                {{ item.nomor_surat }}
+                                {{ item.klasifikasis.nama }}
+                            </td>
+                            <td class="py-1 px-1 text-gray-700">
+                                {{ item.tanggal_surat }}
                             </td>
 
                             <td class="py-1 px-1 text-gray-700">
-                                {{ formatDate(item.tanggal_surat) }}
+                                {{ item.tujuan }}
+                            </td>
+                            <td class="py-1 px-1 text-gray-700">
+                                {{ item.perihal }}
                             </td>
                             <td class="py-1 px-1 text-gray-700">
                                 <FileUpdate :itemId="item.id" />
+                            </td>
+                            <td class="py-1 px-1 text-gray-700">
+                                {{ item.proses_by }}
+                            </td>
+                            <td class="py-1 px-1 text-gray-700">
+                                <button
+                                    class="text-white bg-red-600 px-3 py-2 rounded ml-2 hover:bg-red-700 transition duration-300"
+                                    @click="deleteNomor(item.id)">
+                                    <fa :icon="['fas', 'ban']" />
+                                </button>
+                                <button
+                                    class="text-white bg-yellow-600 px-3 py-2 rounded ml-2 hover:yellow-red-700 transition duration-300"
+                                    @click="toggleModalUpdate(item)">
+                                    <fa :icon="['fas', 'file-pen']" />
+                                </button>
                             </td>
                         </tr>
                     </TableComponent>
@@ -80,6 +112,7 @@
                 </div>
                 <Sekeleton :is_loading="is_loading" />
             </main>
+            <Pagination :pagination="pagination" :totalItems="datas.length" :pageLimit="4" @pageChange="loadNomor" />
         </div>
     </div>
 
@@ -99,13 +132,14 @@
                 <div class="grid gap-6 mb-6 md:grid-cols-1 md:w-96">
                     <div>
 
-                        <label for="jabatan"
-                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Penanda
-                            Tangan</label>
+                        <label for="jabatan" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            <fa :icon="['fas', 'lock']" v-if="isDisabled == true" /> Penanda
+                            Tangan
+                        </label>
 
 
                         <Multiselect v-model="form.jabatan_id" :options="number" placeholder="Penanda tangan"
-                            label="nama" track-by="kode">
+                            :disabled="isDisabled" label="nama" track-by="kode">
 
                         </Multiselect>
                         <span v-if="errors.jabatan_id" class="text-red-500">{{ errors.jabatan_id[0] }}</span>
@@ -114,13 +148,14 @@
 
                     <div>
                         <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                            Jenis Naskah</label>
+                            <fa :icon="['fas', 'lock']" v-if="isDisabled == true" /> Jenis Naskah
+                        </label>
 
                         <Multiselect v-model="form.jenis_naskah_id" :options="jenis_naskahs"
-                            :disabled="!form.jabatan_id" :custom-label="customLabel" placeholder="Jenis naskah"
-                            label="nama" track-by="kode">
+                            :disabled="!form.jabatan_id || isDisabled" :custom-label="customLabel"
+                            placeholder="Jenis naskah" label="nama" track-by="kode">
                             <template v-slot:option="props">
-                                <span>({{ props.option.naskah.nama }}) {{ props.option.nama }} </span>
+                                <span>{{ props.option.nama }} ({{ props.option.naskah.nama }}) </span>
                             </template>
                         </Multiselect>
                         <span v-if="errors.jenis_naskah_id" class="text-red-500">{{ errors.jenis_naskah_id[0]
@@ -129,10 +164,11 @@
                     </div>
                     <div :class="[aksesNaskahAktif == false ? 'hidden' : 'block']">
                         <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                            Akses Naskah (R/B/T)</label>
+                            <fa :icon="['fas', 'lock']" v-if="isDisabled == true" /> Akses Naskah (R/B/T)
+                        </label>
 
                         <Multiselect v-model="form.akses_naskah" :options="aksesNaskahs" placeholder="Akses Naskah"
-                            label="nama" track-by="id">
+                            :disabled="isDisabled" label="nama" track-by="id">
 
                         </Multiselect>
                         <span v-if="errors.akses_naskah" class="text-red-500">{{ errors.akses_naskah[0]
@@ -141,9 +177,10 @@
 
                     <div>
                         <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                            Klasifikasi</label>
+                            <fa :icon="['fas', 'lock']" v-if="isDisabled == true" /> Klasifikasi
+                        </label>
                         <Multiselect v-model="form.klasifikasi_id" :options="klasifikasis" :custom-label="customLabel"
-                            placeholder=" klasisikasi naskah" label="nama" track-by="kode">
+                            :disabled="isDisabled" placeholder=" klasisikasi naskah" label="nama" track-by="kode">
                             <template v-slot:option="props">
                                 <span>({{ props.option.kode }}) {{ props.option.nama }} </span>
                             </template>
@@ -173,7 +210,7 @@
                     </div>
                     <div>
                         <label class="block mb-2 text-sm font-medium text-gray-700">
-                            Tanggal Surat
+                            Tanggal Naskah
                         </label>
                         <input v-model="form.tanggal_surat" type="date"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md  focus:outline-none focus:ring focus:ring-sky-500"
@@ -181,11 +218,26 @@
                         <span v-if="errors.tanggal_surat" class="text-red-500">{{ errors.tanggal_surat[0] }}</span>
 
                     </div>
+
+                    <div>
+                        <label for="proses_by"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Proses By</label>
+                        <select id="proses_by" v-model="form.proses_by"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                            <option selected>Proses By</option>
+                            <option value="manual">Manual</option>
+                            <option value="e-office">E-Office</option>
+                            <option value="srikandi">Srikandi</option>
+                        </select>
+                        <span v-if="errors.proses_by" class="text-red-500">{{ errors.proses_by[0] }}</span>
+                    </div>
                 </div>
 
                 <button v-if="modalCreate" type="submit"
                     class="text-white bg-sky-700 hover:bg-sky-800 focus:ring-4 focus:outline-none focus:ring-sky-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-sky-600 dark:hover:bg-sky-700 dark:focus:ring-sky-800">
-                    Simpan</button>
+                    Simpan
+
+                </button>
                 <button v-if="modalUpdate" type="submit"
                     class="text-white bg-sky-700 hover:bg-sky-800 focus:ring-4 focus:outline-none focus:ring-sky-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-sky-600 dark:hover:bg-sky-700 dark:focus:ring-sky-800">
                     Update</button>
@@ -212,31 +264,38 @@ import formatDate from '../../helpers/fomatDate';
 import dateToday from '../../helpers/dateToday'
 import getAllUserKlasifikasi from '../composables/getAllUserKlasifikasi';
 import router from "../../router";
+import Header from "../Parts/Header.vue"
+import Pagination from '../Parts/Pagination.vue';
+
+
 
 const isSidebarOpen = ref(false)
 const statusModal = ref(false)
 const modalActive = ref(false)
 const modalUpdate = ref(null)
 const modalCreate = ref(null)
-
-const plhActive = ref(false)
+const isDisabled = ref(false)
+const spin = ref(false)
 const aksesNaskahAktif = ref(false)
-
 const number = ref([])
 const errors = ref({})
-const jabatans = ref([]);
 let jenis_naskahs = ref([])
-let naskahs = ref([])
-const plhs = ref([])
+
+
+const pagination = ref([])
 const fillter = {
     search: "",
 }
 
 
 const datas = ref([])
+const copyNumber = ref(datas.value)
+
+
 const is_loading = ref(null)
 const not_found = ref(null)
 const form = ref({
+    id: '',
     jabatan_id: '',
     jenis_naskah_id: '',
     klasifikasi_id: '',
@@ -244,7 +303,8 @@ const form = ref({
     tujuan: '',
     perihal: '',
     akses_naskah: '',
-    plh_id: ''
+    plh_id: '',
+    proses_by: ''
 
 });
 
@@ -258,6 +318,7 @@ const customLabel = (option) => {
 }
 
 const handleFillter = (page) => {
+    not_found.value = false
     datas.value = []
     setTimeout(() => {
 
@@ -270,10 +331,7 @@ const { klasifikasis, loadKlasifikasi } = getAllUserKlasifikasi()
 loadKlasifikasi()
 
 
-const paginationLinks = computed(() => {
-    const totalPages = pagination.value.last_page;
-    return Array.from({ length: totalPages }, (_, i) => i + 1);
-});
+
 
 
 const getNumber = async () => {
@@ -291,24 +349,28 @@ const { aksesNaskahs, loadAksesNaskah } = getAksesNaskah()
 loadAksesNaskah()
 
 //getAll user nomor
-const loadNomor = async () => {
+const loadNomor = async (page = 1) => {
     is_loading.value = true
     datas.value = []
     not_found.value = false
-    await axios.get("/api/user-nomor", {
+
+    await axios.get(`/api/user-nomor?page=${page}`, {
         headers: {
             Authorization: "Bearer" + localStorage.getItem("token"),
         }, params: fillter
     }).then((res) => {
 
         setTimeout(() => {
-            datas.value = res.data.data;
+            datas.value = res.data.data.data;
+            pagination.value = res.data.data
+            console.log(datas.value)
             is_loading.value = false
 
             datas.value.length < 1 ? not_found.value = true : not_found.value = false;
         }, 1000);
 
     }).catch((err) => {
+
         if (
             err.response.data.message == "Token not found or invalid" &&
             err.response.status == 401
@@ -329,40 +391,23 @@ loadNomor();
 
 watch(() => form.value.jabatan_id, (val) => {
     if (val) {
-        // console.log(val.jenis_naskahs)
-        // let jabatan = number.value.find((jabatan) => jabatan.id == val)
-        let jabatan = val
+        let jabatan = number.value.find((jabatan) => jabatan.id == val.id)
+
+        // let jabatan = val
+        // console.log(jabatan)
 
         jenis_naskahs.value = []
         if (jabatan.jenis_naskahs.length > 0) {
             jenis_naskahs.value = jabatan.jenis_naskahs
         }
     }
-    // if (Array.isArray(val) && val.length > 0) {
-    //     // Clear the jenis_naskahs array before populating it
-    //     jenis_naskahs.value = [];
 
-    //     // Loop through each selected jabatan_id
-    //     val.forEach(jabatan_id => {
-    //         // Find the corresponding jabatan based on jabatan_id
-    //         let jabatan = number.value.find((jabatan) => jabatan.id == jabatan_id);
-
-    //         // If the jabatan has jenis_naskahs, add them to the array
-    //         if (jabatan && jabatan.jenis_naskahs.length > 0) {
-    //             jenis_naskahs.value.push(...jabatan.jenis_naskahs);
-    //         }
-    //     });
-    // } else {
-    //     // If no selection, reset the jenis_naskahs array
-    //     jenis_naskahs.value = [];
-    // }
 },
 );
 
 watch(() => form.value.jenis_naskah_id, (val) => {
     if (val) {
         // let aksesNaskah = jenis_naskahs.value.find((aksesNaskah) => aksesNaskah.id == val)
-        console.log(val)
         let aksesNaskah = val
         form.value.akses_naskah = '';
 
@@ -379,125 +424,147 @@ watch(() => form.value.jenis_naskah_id, (val) => {
 
 const createNomor = async () => {
 
-    // if (checkTime()) {
-    Swal.fire({
-        title: "Anda Yakin Membuat Nomor?",
-        text: "Pastikan Nomor ini akan anda gunakan",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "iya, Yakin!"
-    }).then(async (result) => { // Menambahkan async di sini
-        if (result.isConfirmed) {
-            try {
-                await axios.post("/api/nomor", {
-                    jabatan_id: form.value.jabatan_id,
-                    jenis_naskah_id: form.value.jenis_naskah_id,
-                    klasifikasi_id: form.value.klasifikasi_id,
-                    tanggal_surat: form.value.tanggal_surat,
-                    tujuan: form.value.tujuan,
-                    perihal: form.value.perihal,
-                    akses_naskah: form.value.akses_naskah,
-                }, {
-                    headers: {
-                        Authorization: "Bearer " + localStorage.getItem("token"),
-                    },
-                });
+    if (checkTime()) {
+        Swal.fire({
+            title: "Anda Yakin Membuat Nomor?",
+            text: "Pastikan Nomor ini akan anda gunakan",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "iya, Yakin!"
+        }).then(async (result) => { // Menambahkan async di sini
+            if (result.isConfirmed) {
+                try {
+                    await axios.post("/api/nomor", {
+                        jabatan_id: form.value.jabatan_id,
+                        jenis_naskah_id: form.value.jenis_naskah_id,
+                        klasifikasi_id: form.value.klasifikasi_id,
+                        tanggal_surat: form.value.tanggal_surat,
+                        tujuan: form.value.tujuan,
+                        perihal: form.value.perihal,
+                        proses_by: form.value.proses_by,
+                        akses_naskah: form.value.akses_naskah,
+                    }, {
+                        headers: {
+                            Authorization: "Bearer " + localStorage.getItem("token"),
+                        },
+                    });
 
-                loadNomor();
-                modalActive.value = !modalActive.value;
+                    loadNomor();
+                    modalActive.value = !modalActive.value;
 
-                const Toast = Swal.mixin({
-                    toast: true,
-                    position: "top-end",
-                    showConfirmButton: false,
-                    timer: 3000,
-                    timerProgressBar: true,
-                    didOpen: (toast) => {
-                        toast.onmouseenter = Swal.stopTimer;
-                        toast.onmouseleave = Swal.resumeTimer;
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: "top-end",
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        didOpen: (toast) => {
+                            toast.onmouseenter = Swal.stopTimer;
+                            toast.onmouseleave = Swal.resumeTimer;
+                        }
+                    });
+                    Toast.fire({
+                        icon: "success",
+                        title: "Data has been saved"
+                    });
+
+                } catch (err) {
+                    const cekTime = err.response.data.message
+                    if (err.response && err.response.status === 422) {
+                        errors.value = err.response.data.errors;
                     }
-                });
-                Toast.fire({
-                    icon: "success",
-                    title: "Data has been saved"
-                });
 
-            } catch (err) {
-                const cekTime = err.response.data.message
-                if (err.response && err.response.status === 422) {
-                    errors.value = err.response.data.errors;
-                }
+                    if (
+                        err.response.data.message == "Token not found or invalid" &&
+                        err.response.status == 401
+                    ) {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Oops...",
+                            text: "Token expired silakan login kembali",
+                        });
 
-                if (
-                    err.response.data.message == "Token not found or invalid" &&
-                    err.response.status == 401
-                ) {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Oops...",
-                        text: "Token expired silakan login kembali",
-                    });
+                        router.push("/");
+                    }
 
-                    router.push("/");
-                }
+                    if (cekTime && err.response.status == 403) {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Oops...",
+                            text: `${cekTime}`,
+                        });
 
-                if (cekTime && err.response.status == 403) {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Oops...",
-                        text: `${cekTime}`,
-                    });
-
+                    }
                 }
             }
-        }
-    });
-    // }
+        });
+    }
 
 };
 
 
-// const updateNomor = async () => {
-//     await axios.put("/api/klasifikasi/" + form.value.id, {
-//         headers: {
-//             Authorization: "Bearer" + localStorage.getItem("token"),
-//         },
+const updateNomor = async () => {
+    await axios.put("/api/update-nomor/" + form.value.id, {
+        tujuan: form.value.tujuan,
+        perihal: form.value.perihal,
+        tanggal_surat: form.value.tanggal_surat,
+        proses_by: form.value.proses_by
+    }, {
+        headers: {
+            Authorization: "Bearer " + localStorage.getItem("token"),
+        }
 
-//         nama: form.value.nama,
-//         kode: form.value.kode
-//     }).then(() => {
-//         loadNomor()
-//         modalActive.value = !modalActive.value
-//         const Toast = Swal.mixin({
-//             toast: true,
-//             position: "top-end",
-//             showConfirmButton: false,
-//             timer: 3000,
-//             timerProgressBar: true,
-//             didOpen: (toast) => {
-//                 toast.onmouseenter = Swal.stopTimer;
-//                 toast.onmouseleave = Swal.resumeTimer;
-//             }
-//         });
-//         Toast.fire({
-//             icon: "success",
-//             title: "Data has been updated"
-//         });
-//     })
-// }
+
+    }).then(() => {
+        loadNomor()
+        modalActive.value = !modalActive.value
+        const Toast = Swal.mixin({
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.onmouseenter = Swal.stopTimer;
+                toast.onmouseleave = Swal.resumeTimer;
+            }
+        });
+        Toast.fire({
+            icon: "success",
+            title: "Data has been updated"
+        });
+    }).catch((err) => {
+        if (err.response && err.response.status === 422) {
+            errors.value = err.response.data.errors
+        }
+
+        if (
+            err.response.data.message == "Token not found or invalid" &&
+            err.response.status == 401
+        ) {
+            Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: "Token expired silakan login kembali",
+            });
+
+            router.push("/");
+        }
+    })
+}
 
 const deleteNomor = (id) => {
 
     Swal.fire({
-        title: "Are you sure?",
-        text: "You won't be able to revert this!",
+        title: "Apakah ingin membatalkan nomor ini?",
+        text: "Anda tidak bisa lagi menggunakan nomor ini!",
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, delete it!"
+        confirmButtonText: "Iya, Batalkan!"
     }).then((result) => {
         if (result.isConfirmed) {
 
@@ -508,8 +575,8 @@ const deleteNomor = (id) => {
             }).then(() => {
                 loadNomor()
                 Swal.fire({
-                    title: "Deleted!",
-                    text: "Your file has been deleted.",
+                    title: "Dibatalkan!",
+                    text: "Nomor anda telah dibatalkan.",
                     icon: "success"
                 });
             }).catch((err) => {
@@ -536,6 +603,7 @@ const toggleModal = () => {
 }
 const toggleModalPlus = () => {
     form.value = {}
+    isDisabled.value = false
     statusModal.value = true
     modalCreate.value = true
     modalActive.value = !modalActive.value
@@ -544,44 +612,61 @@ const toggleModalPlus = () => {
     form.value.tanggal_surat = dateToday()
 
 }
-const toggleModalUpdate = (p) => {
+const toggleModalUpdate = (item) => {
+    isDisabled.value = true
     statusModal.value = false
     modalUpdate.value = true
     modalActive.value = !modalActive.value
     modalCreate.value = false
-    form.value.klasifikasi_id = klasifikasis.value
-    form.value.akses_naskah = akses_naskah.value.id
+    form.value.id = item.id
+    form.value.perihal = item.perihal
+    form.value.tujuan = item.tujuan
+    form.value.tanggal_surat = item.tanggal_surat
+    form.value.proses_by = item.proses_by
+    form.value.jabatan_id = item.jabatan
+
+    form.value.klasifikasi_id = item.klasifikasis
+    setTimeout(() => {
+
+        let jenis_naskah = jenis_naskahs.value.find((jenis_naskah) => jenis_naskah.id == item.jenis_naskah_id)
+
+        form.value.jenis_naskah_id = jenis_naskah
+    }, 500)
 }
 
 
-// const toggleUpdateFile = (p) => {
-//     statusModal.value = false
-//     modalUpdate.value = true
-//     modalActive.value = !modalActive.value
-//     modalCreate.value = false
-//     form.value.klasifikasi_id = klasifikasis.value
-//     form.value.akses_naskah = akses_naskah.value.id
-// }
-
-// const checkTime = () => {
-//     const currentHour = new Date().getHours();
-
-//     // Cek waktu (09:00 hingga 17:00)
-//     if (currentHour < 9 || currentHour >= 17) {
-//         Swal.fire({
-//             icon: "error",
-//             title: "Oops...",
-//             text: "Anda hanya dapat membuat nomor pada jam 09.00 hingga jam 17.00 WITA.",
-//         });
-//         return false;
-//     }
-
-//     // Lanjutkan pengiriman form
-//     return true;
-// }
 
 
+const checkTime = () => {
+    const currentHour = new Date().getHours();
 
+    // Cek waktu (09:00 hingga 17:00)
+    if (currentHour < 8 || currentHour >= 18) {
+        Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: "Anda hanya dapat membuat nomor pada jam 08.00 hingga jam 18.00 WITA.",
+        });
+        return false;
+    }
+
+    // Lanjutkan pengiriman form
+    return true;
+}
+
+
+const copySuccess = ref(false);
+
+// Function to copy text to clipboard
+const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text).then(() => {
+        copySuccess.value = true;
+        alert(`Nomor Naskah "${text}" berhasil disalin!`);
+        setTimeout(() => {
+            copySuccess.value = false;
+        }, 2000); // Hide success message after 2 seconds
+    });
+};
 
 </script>
 

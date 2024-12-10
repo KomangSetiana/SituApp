@@ -11,14 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('jenis_naskahs', function (Blueprint $table) {
+        Schema::create('templates', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('naskah_id')->constrained('naskahs')->onDelete('cascade');
-            $table->string('kode');
             $table->string('nama');
-            $table->boolean('akses_naskah')->nullable()->default(0);
-            $table->boolean('has_direktur')->nullable()->default(0);
-            $table->softDeletes();
+            $table->string('filename');
             $table->timestamps();
         });
     }
@@ -28,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('jenis_naskahs');
+        Schema::dropIfExists('templates');
     }
 };

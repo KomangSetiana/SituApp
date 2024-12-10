@@ -7,9 +7,7 @@
             <img src="../../../../public/logo.png" alt="Poltekpar" class="w-14">
             <span class="text-md font-bold">Sistem Informasi Tata Usaha</span>
         </a>
-        <div class="text-white px-3 py-2 bg-sky-900 rounded-lg text-sm">
-            <fa :icon="['fas', 'user']" /> {{ userName }}
-        </div>
+
         <nav>
             <router-link to="/admin/dashboard" v-show="user.role == 'admin'"
                 class="link-sidebar block py-2.5 px-4 rounded transition duration-200 hover:bg-sky-900 hover:text-white">
@@ -60,15 +58,28 @@
             <div v-show="user.role == 'admin'">
                 <router-link to="/nomor"
                     class="link-sidebar block py-2.5 px-4 rounded transition duration-200 hover:bg-sky-900 hover:text-white">
-                    <fa :icon="['fas', 'envelope-open-text']" /> Nomor Naskah Baru
+                    <fa :icon="['fas', 'envelope-open-text']" /> Nomor Baru
                 </router-link>
-                <router-link to="/nomor-selesai"
+                <router-link to="/nomor/selesai"
                     class="link-sidebar block py-2.5 px-4 rounded transition duration-200 hover:bg-sky-900 hover:text-white">
-                    <fa :icon="['fas', 'envelope']" /> Nomor Naskah Selesai
+                    <fa :icon="['fas', 'envelope']" /> Naskah Selesai
+                </router-link>
+
+                <router-link to="/nomor/rejected"
+                    class="link-sidebar block py-2.5 px-4 rounded transition duration-200 hover:bg-sky-900 hover:text-white">
+                    <fa icon="fa-solid fa-rectangle-xmark" /> Naskah Ditolak
+                </router-link>
+                <router-link to="/nomor/dibatalkan"
+                    class="link-sidebar block py-2.5 px-4 rounded transition duration-200 hover:bg-sky-900 hover:text-white">
+                    <fa :icon="['fas', 'ban']" /> Nomor Dibatalkan
+                </router-link>
+                <router-link to="/nomor/all"
+                    class="link-sidebar block py-2.5 px-4 rounded transition duration-200 hover:bg-sky-900 hover:text-white">
+                    <fa :icon="['fas', 'earth-asia']" /> Seluruh Nomor Naskah
                 </router-link>
                 <router-link to="/arsip-naskah"
                     class="link-sidebar block py-2.5 px-4 rounded transition duration-200 hover:bg-sky-900 hover:text-white">
-                    <fa :icon="['fas', 'boxes-packing']" /> Arsip Naskah Dinas
+                    <fa :icon="['fas', 'boxes-packing']" /> Arsip Naskah
                 </router-link>
             </div>
             <!-- Nomor Akses Admin End -->
@@ -77,17 +88,35 @@
             <div v-show="user.role == 'user'">
                 <router-link to="/my/nomor"
                     class="link-sidebar block py-2.5 px-4 rounded transition duration-200 hover:bg-sky-900 hover:text-white">
-                    <fa :icon="['fas', 'envelope-open-text']" /> Nomor Naskah Baru
+                    <fa :icon="['fas', 'envelope-open-text']" /> Nomor Baru
                 </router-link>
                 <router-link to="/my/nomor/selesai"
                     class="link-sidebar block py-2.5 px-4 rounded transition duration-200 hover:bg-sky-900 hover:text-white">
-                    <fa :icon="['fas', 'envelope']" /> Nomor Naskah Selesai
+                    <fa :icon="['fas', 'envelope']" /> Naskah Selesai
+                </router-link>
+                <router-link to="/my/nomor/rejected"
+                    class="link-sidebar block py-2.5 px-4 rounded transition duration-200 hover:bg-sky-900 hover:text-white">
+                    <fa icon="fa-solid fa-rectangle-xmark" /> Naskah Ditolak
+                </router-link>
+                <router-link to="/my/nomor/dibatalkan"
+                    class="link-sidebar block py-2.5 px-4 rounded transition duration-200 hover:bg-sky-900 hover:text-white">
+                    <fa :icon="['fas', 'ban']" /> Nomor Dibatalkan
+                </router-link>
+                <router-link to="/my/nomor/all"
+                    class="link-sidebar block py-2.5 px-4 rounded transition duration-200 hover:bg-sky-900 hover:text-white">
+                    <fa :icon="['fas', 'earth-asia']" /> Seluruh Nomor Naskah
                 </router-link>
                 <router-link to="/my/arsip"
                     class="link-sidebar block py-2.5 px-4 rounded transition duration-200 hover:bg-sky-900 hover:text-white">
-                    <fa :icon="['fas', 'boxes-packing']" /> Arsip Naskah Dinas
+                    <fa :icon="['fas', 'boxes-packing']" /> Arsip Naskah
                 </router-link>
+
             </div>
+            <!-- Template -->
+            <router-link to="/template"
+                class="link-sidebar block py-2.5 px-4 rounded transition duration-200 hover:bg-sky-900 hover:text-white">
+                <fa :icon="['fas', 'book-bookmark']" /> Template Naskah
+            </router-link>
             <!-- Nomor Akses User End -->
 
             <button @click="deleteToken()"
@@ -152,6 +181,8 @@ const deleteToken = () => {
         }
     })
 }
+
+
 
 
 // Dropdown visibility state

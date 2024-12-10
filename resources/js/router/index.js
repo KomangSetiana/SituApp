@@ -8,15 +8,26 @@ import Jabatan from "../components/Jabatan/Index.vue";
 import Klasifikasi from "../components/Klasifikasi/Index.vue";
 import Wewenang from "../components/Wewenang/Index.vue";
 import Plh from "../components/Plh/Index.vue";
-import AdminDashboard from "../components/nomor/Dashboard.vue";
 
+// admin nomor
+import AdminDashboard from "../components/nomor/Dashboard.vue";
 import Nomor from "../components/nomor/Index.vue";
 import NomorSelesai from "../components/nomor/NomorSelesai.vue";
 import ArsipNaskah from "../components/nomor/ArsipNaskah.vue";
+import NomorRejected from "../components/nomor/NomorRejected.vue";
+import NomorCanceled from "../components/nomor/NomorCancaled.vue";
+import AllNomor from "../components/nomor/AllNomor.vue";
+
+//user nomor
 import MyDashboard from "../components/UserNomor/Dashboard.vue";
 import MyNomor from "../components/UserNomor/NomorBaru.vue";
 import MyNomorSelesai from "../components/UserNomor/NomorSelesai.vue";
 import MyArsip from "../components/UserNomor/ArsipNomor.vue";
+import MyRejectedNomor from "../components/UserNomor/NomorRejected.vue";
+import MyCanceledNomor from "../components/UserNomor/NomorCancaled.vue";
+import MyAllNomor from "../components/UserNomor/AllNomor.vue";
+import Template from "../components/Template/Index.vue";
+
 const routes = [
     {
         path: "/",
@@ -102,9 +113,48 @@ const routes = [
         },
     },
     {
-        path: "/nomor-selesai",
+        path: "/nomor/selesai",
         name: "nomor.selesai",
         component: NomorSelesai,
+        beforeEnter: (to, from, next) => {
+            const user = JSON.parse(localStorage.getItem("user"));
+            if (user && user.role === "admin") {
+                next();
+            } else {
+                next("/");
+            }
+        },
+    },
+    {
+        path: "/nomor/rejected",
+        name: "nomor.rejected",
+        component: NomorRejected,
+        beforeEnter: (to, from, next) => {
+            const user = JSON.parse(localStorage.getItem("user"));
+            if (user && user.role === "admin") {
+                next();
+            } else {
+                next("/");
+            }
+        },
+    },
+    {
+        path: "/nomor/dibatalkan",
+        name: "nomor.dibatalkan",
+        component: NomorCanceled,
+        beforeEnter: (to, from, next) => {
+            const user = JSON.parse(localStorage.getItem("user"));
+            if (user && user.role === "admin") {
+                next();
+            } else {
+                next("/");
+            }
+        },
+    },
+    {
+        path: "/nomor/all",
+        name: "nomor.all",
+        component: AllNomor,
         beforeEnter: (to, from, next) => {
             const user = JSON.parse(localStorage.getItem("user"));
             if (user && user.role === "admin") {
@@ -194,12 +244,67 @@ const routes = [
         },
     },
     {
+        path: "/my/nomor/rejected",
+        name: "my.nomor.rejected",
+        component: MyRejectedNomor,
+        beforeEnter: (to, from, next) => {
+            const user = JSON.parse(localStorage.getItem("user"));
+            if (user && user.role === "user") {
+                next();
+            } else {
+                next("/");
+            }
+        },
+    },
+    {
+        path: "/my/nomor/dibatalkan",
+        name: "my.nomor.dibatalkan",
+        component: MyCanceledNomor,
+        beforeEnter: (to, from, next) => {
+            const user = JSON.parse(localStorage.getItem("user"));
+            if (user && user.role === "user") {
+                next();
+            } else {
+                next("/");
+            }
+        },
+    },
+    {
+        path: "/my/nomor/all",
+        name: "my.nomor.all",
+        component: MyAllNomor,
+        beforeEnter: (to, from, next) => {
+            const user = JSON.parse(localStorage.getItem("user"));
+            if (user && user.role === "user") {
+                next();
+            } else {
+                next("/");
+            }
+        },
+    },
+    {
         path: "/my/arsip",
         name: "my.arsip",
         component: MyArsip,
         beforeEnter: (to, from, next) => {
             const user = JSON.parse(localStorage.getItem("user"));
             if (user && user.role === "user") {
+                next();
+            } else {
+                next("/");
+            }
+        },
+    },
+    {
+        path: "/template",
+        name: "template",
+        component: Template,
+        beforeEnter: (to, from, next) => {
+            const user = JSON.parse(localStorage.getItem("user"));
+            if (
+                (user && user.role === "user") ||
+                (user && user.role === "admin")
+            ) {
                 next();
             } else {
                 next("/");

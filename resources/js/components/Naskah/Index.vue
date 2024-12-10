@@ -6,16 +6,8 @@
 
         <!-- Main content -->
         <div class="flex-1 flex flex-col h-screen overflow-y-auto">
-            <header class="flex justify-between items-center bg-sky-900 shadow-md p-4">
-                <div class="text-2xl text-yellow-400 font-bold">Naskah Dinas</div>
-                <button @click="toggleSidebar" class="md:hidden text-yellow-400 focus:outline-none">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
-                </button>
-            </header>
+            <Header :title="'Tipe Naskah'" @toggleSidebar="toggleSidebar" />
+
             <main class="flex-1 p-6">
                 <div class="w-full">
                     <div class="flex justify-between w-full">
@@ -134,6 +126,7 @@ import getNaskah from '../composables/getNaskah';
 import Swal from 'sweetalert2'
 import NotFound from '../Parts/404.vue'
 import router from "../../router";
+import Header from "../Parts/Header.vue"
 
 const isSidebarOpen = ref(false)
 const statusModal = ref(false)
@@ -154,6 +147,7 @@ function toggleSidebar() {
 }
 
 const handleFillter = () => {
+    not_found.value = false
     naskahs.value = []
     setTimeout(() => {
 
@@ -260,13 +254,13 @@ const updateNaskah = async () => {
 const deleteNaskah = (id) => {
 
     Swal.fire({
-        title: "Are you sure?",
-        text: "You won't be able to revert this!",
+        title: "Apakah anda yakin?",
+        text: "Anda tidak akan bisa mengembalikan data ini!",
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, delete it!"
+        confirmButtonText: "Iya,Hapus!"
     }).then((result) => {
         if (result.isConfirmed) {
 
@@ -277,8 +271,8 @@ const deleteNaskah = (id) => {
             }).then(() => {
                 loadNaskah()
                 Swal.fire({
-                    title: "Deleted!",
-                    text: "Your file has been deleted.",
+                    title: "Terhapus!",
+                    text: "Data anda telah dihapus.",
                     icon: "success"
                 });
             }).catch((err) => {
